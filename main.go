@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/4frag/padalko/tasks"
+	"github.com/4frag/padalko/model"
 	"github.com/4frag/padalko/utils"
 	"github.com/yarlson/tap"
 )
@@ -20,40 +20,40 @@ func inputMatrix(ctx context.Context) error {
 		return nil
 	}
 
-	tasks.CurrentData.SizeA = utils.InputNumber(ctx, "Input count of resources", "", 0, size_validator)
-	tasks.CurrentData.SizeB = utils.InputNumber(ctx, "Input count of objects", "", 0, size_validator)
+	model.CurrentData.SizeA = utils.InputNumber(ctx, "Input count of resources", "", 0, size_validator)
+	model.CurrentData.SizeB = utils.InputNumber(ctx, "Input count of objects", "", 0, size_validator)
 
-	tasks.CurrentData.Model = make([][]float64, tasks.CurrentData.SizeA)
-	for i := 0; i < tasks.CurrentData.SizeA; i++ {
+	model.CurrentData.Model = make([][]float64, model.CurrentData.SizeA)
+	for i := 0; i < model.CurrentData.SizeA; i++ {
 		row, err := utils.InputMatrixRow[float64](
 			ctx,
 			fmt.Sprintf("Row %d:", i+1),
-			tasks.CurrentData.SizeB,
+			model.CurrentData.SizeB,
 			nil,
 		)
 		if err != nil {
 			return err
 		}
-		tasks.CurrentData.Model[i] = row
+		model.CurrentData.Model[i] = row
 	}
 	return nil
 }
 
 func inputResources(ctx context.Context) error {
-	result, err := utils.InputMatrixRow[float64](ctx, "Input resources vector", tasks.CurrentData.SizeA, nil)
+	result, err := utils.InputMatrixRow[float64](ctx, "Input resources vector", model.CurrentData.SizeA, nil)
 	if err != nil {return err}
-	tasks.CurrentData.A = result
+	model.CurrentData.A = result
 	return nil
 }
 
 func inputPlan(ctx context.Context) error {
-	result, err := utils.InputMatrixRow[float64](ctx, "Input plan vector", tasks.CurrentData.SizeB, nil)
+	result, err := utils.InputMatrixRow[float64](ctx, "Input plan vector", model.CurrentData.SizeB, nil)
 	if err != nil {return err}
-	tasks.CurrentData.B = result
+	model.CurrentData.B = result
 	return nil
 }
 
-func PrintModelData(ctx context.Context, data tasks.ModelData) {
+func PrintModelData(ctx context.Context, data model.ModelData) {
 	tap.Message(fmt.Sprintf("ModelData: SizeA = %d, SizeB = %d", data.SizeA, data.SizeB))
 
 	// Вывод матрицы Model
@@ -151,11 +151,11 @@ func main() {
 		case ActionInputPlan:
 			inputPlan(ctx)
 		case ActionCalculatePlan:
-			tasks.CurrentData.CalculatePlan()
+			model.CurrentData.CalculatePlan()
 		case ActionCalculateWithCriteria:
-			criteria, err := utils.InputMatrixRow[float64](ctx, "Input criteria", tasks.CurrentData.SizeB, nil)
+			criteria, err := utils.InputMatrixRow[float64](ctx, "Input criteria", model.CurrentData.SizeB, nil)
 			if err != nil {panic(err)}
-			result, err := tasks.CurrentData.SolveWithCriteria(criteria)
+			result, err := model.CurrentData.SolveWithCriteria(criteria)
 			result_str := make([]string, len(result))
 			for i, v := range result {
 				result_str[i] = strconv.FormatFloat(v, 'f', -1, 64)
@@ -165,7 +165,7 @@ func main() {
 			tap.Message("Bye 👋")
 			return
 		case ActionInfo:
-			PrintModelData(ctx, tasks.CurrentData)
+			PrintModelData(ctx, model.CurrentData)
 		}
 	}
 }

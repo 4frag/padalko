@@ -1,4 +1,4 @@
-package tasks
+package model
 
 type ModelData struct {
 	SizeA int
